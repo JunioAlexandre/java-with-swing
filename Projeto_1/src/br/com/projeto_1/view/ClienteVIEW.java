@@ -5,17 +5,29 @@
 package br.com.projeto_1.view;
 import java.awt.Dimension;
 import javax.swing.JOptionPane;
+import java.sql.ResultSet;
+import javax.swing.table.DefaultTableModel;
+import br.com.projeto_1.dto.ClienteDTO;
+import br.com.projeto_1.ctr.ClienteCTR;
+
 /**
  *
  * @author junio
  */
 public class ClienteVIEW extends javax.swing.JInternalFrame {
 
-    /**
-     * Creates new form ClienteVIEW
-     */
+    ClienteDTO clienteDTO = new ClienteDTO(); // Cria um objeto clienteDTO
+    ClienteCTR clienteCTR = new ClienteCTR(); // Cria um objeto clienteCTR
+    
+    int gravar_alterar; // Variavel usada para saber se esta alterando ou incluindo
+    
     public ClienteVIEW() {
         initComponents();
+        
+        //Chama todos os metodos liberaCampos
+        liberaCampos(false);
+        //Chama o metodo liberaBotoes
+        liberaBotoes(true, false, false, false, true);
     }
 
     /**
@@ -103,6 +115,11 @@ public class ClienteVIEW extends javax.swing.JInternalFrame {
 
         btnNovo.setFont(new java.awt.Font("Liberation Sans", 0, 18)); // NOI18N
         btnNovo.setText("Novo");
+        btnNovo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNovoActionPerformed(evt);
+            }
+        });
 
         btnSalvar.setFont(new java.awt.Font("Liberation Sans", 0, 18)); // NOI18N
         btnSalvar.setText("Salvar");
@@ -153,7 +170,7 @@ public class ClienteVIEW extends javax.swing.JInternalFrame {
                                         .addGap(30, 30, 30)
                                         .addComponent(jLabel8)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(estado_cli, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(estado_cli, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(cep_cli, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -220,7 +237,7 @@ public class ClienteVIEW extends javax.swing.JInternalFrame {
                     .addComponent(btnCancelar)
                     .addComponent(btnExcluir)
                     .addComponent(btnSair))
-                .addContainerGap(40, Short.MAX_VALUE))
+                .addContainerGap(44, Short.MAX_VALUE))
         );
 
         pack();
@@ -235,18 +252,82 @@ public class ClienteVIEW extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cep_cliActionPerformed
 
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed
-        // TODO add your handling code here:
+        if(gravar_alterar == 1){
+            gravar();
+            gravar_alterar=0;
+        }
+        
+        limpaCampos();
+        liberaCampos(false);
+        liberaBotoes(true, false, false, false, true);
     }//GEN-LAST:event_btnSalvarActionPerformed
 
     private void estado_cliActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_estado_cliActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_estado_cliActionPerformed
 
+    private void btnNovoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNovoActionPerformed
+        liberaCampos(true);
+        liberaBotoes(false, true, true, false, true);
+        gravar_alterar = 1;
+    }//GEN-LAST:event_btnNovoActionPerformed
+
 public void setPosicao(){
     Dimension d = this.getDesktopPane().getSize();
     this.setLocation((d.width = this.getSize().width) / 2, (d.height = this.getSize().height) / 2);
 }
-    
+ 
+private void liberaCampos(boolean a){
+    nome_cli.setEnabled(a);
+    logradouro_cli.setEnabled(a);
+    numero_cli.setEnabled(a);
+    bairro_cli.setEnabled(a);
+    cidade_cli.setEnabled(a);
+    estado_cli.setEnabled(a);
+    cep_cli.setEnabled(a);
+    cpf_cli.setEnabled(a);
+    rg_cli.setEnabled(a); 
+}//Fecha metodo liberaCampos(boolean a)
+
+private void limpaCampos(){
+    nome_cli.setText("");
+    logradouro_cli.setText("");
+    numero_cli.setText("");
+    bairro_cli.setText("");
+    cidade_cli.setText("");
+    cep_cli.setText("");
+    cpf_cli.setText("");
+    rg_cli.setText("");
+}//Fefcha metodo limpaCampos()
+
+private void liberaBotoes(boolean a, boolean b, boolean c, boolean d, boolean e){
+    btnNovo.setEnabled(a);
+    btnSalvar.setEnabled(b);
+    btnCancelar.setEnabled(c);
+    btnExcluir.setEnabled(d);
+    btnSair.setEnabled(e);
+}
+
+private void gravar(){
+    try{
+        clienteDTO.setNome_cli(nome_cli.getText());
+        clienteDTO.setLogradouro_cli(logradouro_cli.getText());
+        clienteDTO.setNumero_cli(Integer.parseInt(numero_cli.getText()));
+        clienteDTO.setBairro_cli(bairro_cli.getText());
+        clienteDTO.setCidade_cli(cidade_cli.getText());
+        clienteDTO.setEstado_cli(estado_cli.getSelectedItem().toString());
+        clienteDTO.setCep_cli(cep_cli.getText());
+        clienteDTO.setCpf_cli(cpf_cli.getText());
+        clienteDTO.setRg_cli(rg_cli.getText());
+        
+        JOptionPane.showMessageDialog(null,
+                clienteCTR.inserirCliente(clienteDTO));
+    }
+    catch (Exception e){
+        System.out.println("Erro ao gravar" + e.getMessage());
+    }
+}
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField bairro_cli;
     private javax.swing.JButton btnCancelar;
