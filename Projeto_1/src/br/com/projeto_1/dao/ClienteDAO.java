@@ -54,4 +54,41 @@ public class ClienteDAO {
         }
     }//Fecha o metodo inserirCliente
     
+    public ResultSet consultarCliente(ClienteDTO clienteDTO, int opcao){
+        try{
+            //Chama o metodo que esta na classe ConexaoDAO para abrir o banco de dados
+            ConexaoDAO.ConnectDB();
+            //Cria o Statement que é responsavel por executar alguma coisa no banco de dados
+            stmt = ConexaoDAO.con.createStatement();
+            //Comando SQL que sera executado no banco de dados
+            String comando = "";
+            
+            switch (opcao){
+                case 1:
+                    comando = "Select c.* "+
+                              "from cliente c "+
+                              "where nome_cli like '" + clienteDTO.getNome_cli()+ "%'"+
+                              "order by c.nome_cli";
+                break;
+                case 2:
+                    comando = "Select c.* "+
+                              "from cliente c " +
+                              "where c.id_cli = " + clienteDTO.getId_cli();
+                break;
+                case 3:
+                    comando = "Select c.id_cli, c.nome_cli "+
+                              "from cliente c ";
+                break;
+            }
+            //Executa o comando SQL no banco de dados
+            rs = stmt.executeQuery(comando.toUpperCase());
+            return rs;
+        }
+        //Caso hé´ algum erro no codigo acima, é enviado uma msg no console com o que esté
+         catch (Exception e){
+             System.out.println(e.getMessage());
+             return rs;
+         }
+    }
+    
 }//Fecha classe ClienteDAO

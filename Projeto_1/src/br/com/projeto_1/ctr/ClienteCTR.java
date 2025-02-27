@@ -27,4 +27,20 @@ public class ClienteCTR {
             return "Cliente não cadastrado";
         }
     }
+    
+    public ResultSet consultarCliente(ClienteDTO clienteDTO, int opcao){
+        //É criado um atributo do tipo ResultSet, pois este metodo receve o resultado de uma consulta
+        ResultSet rs = null;
+        
+        //O atributo rs recebe a consulta realizada pelo metodo da classe DAO
+        rs = clienteDAO.consultarCliente(clienteDTO, opcao);
+        
+        return rs;
+    }
+    
+    //Metodo utilizado para fechar o banco de dados
+    public void CloseDB(){
+        ConexaoDAO.CloseDB();
+    }
+    
 }
