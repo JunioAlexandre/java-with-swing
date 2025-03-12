@@ -91,4 +91,79 @@ public class ClienteDAO {
          }
     }
     
+     public boolean alterarCliente (ClienteDTO clienteDTO){
+        try{
+            //Chama o metodo que esta na classe ConexaoDAO para abrir o banco de dados
+            ConexaoDAO.ConnectDB();
+            //Instancia o Statement que sera responsavel por executar alguma coisa no banco
+            stmt = ConexaoDAO.con.createStatement();
+            
+            String comando = "Update cliente set "
+                    + "nome_cli = '" + clienteDTO.getNome_cli()+ "', "
+                    + "numero_cli = " + clienteDTO.getNumero_cli()+ ", "
+                    + "logradouro_cli = '" + clienteDTO.getLogradouro_cli()+"', "
+                    + "bairro_cli = '" + clienteDTO.getBairro_cli()+"', "
+                    + "cidade_cli = '" + clienteDTO.getCidade_cli()+"', "
+                    + "estado_cli = '" + clienteDTO.getEstado_cli()+"', "
+                    + "cep_cli = '" + clienteDTO.getCep_cli()+"', "
+                    + "cpf_cli = '" + clienteDTO.getCpf_cli()+"', "
+                    + "rg_cli = '" + clienteDTO.getRg_cli()+ "' "
+                    + "where id_cli = " + clienteDTO.getId_cli();
+            
+            //Executa o comando SQL no banco de dados.
+            stmt.execute(comando.toUpperCase());
+            
+            //Da um commit no banco de dados
+            ConexaoDAO.con.commit();
+            
+            //Fecha o statement
+            stmt.close();
+            return true;
+        }//Caso tenha algum erro no codigo acima é enviado uma mensagem no 
+        //console com o que esta acontecendo.
+        
+        catch (Exception e){
+            System.out.println(e.getMessage());
+            return false;
+        }//Independente de dar erro ou nao ele vai fechar o banco de dados.
+        finally{
+            //Chama o metodo da classe ConexaoDAO para fechar o banco de dados
+            ConexaoDAO.CloseDB();
+        }
+    }//Fecha o metodo inserirCliente
+    
+     public boolean excluirCliente (ClienteDTO clienteDTO){
+        try{
+            //Chama o metodo que esta na classe ConexaoDAO para abrir o banco de dados
+            ConexaoDAO.ConnectDB();
+            //Instancia o Statement que sera responsavel por executar alguma coisa no banco
+            stmt = ConexaoDAO.con.createStatement();
+            
+            String comando = "Delete from cliente where id_cli = "
+                              + clienteDTO.getId_cli();
+                   
+            
+            //Executa o comando SQL no banco de dados.
+            stmt.execute(comando);
+            
+            //Da um commit no banco de dados
+            ConexaoDAO.con.commit();
+            
+            //Fecha o statement
+            stmt.close();
+            return true;
+        }//Caso tenha algum erro no codigo acima é enviado uma mensagem no 
+        //console com o que esta acontecendo.
+        
+        catch (Exception e){
+            System.out.println(e.getMessage());
+            return false;
+        }//Independente de dar erro ou nao ele vai fechar o banco de dados.
+        finally{
+            //Chama o metodo da classe ConexaoDAO para fechar o banco de dados
+            ConexaoDAO.CloseDB();
+        }
+    }//Fecha o metodo inserirCliente
+     
+     
 }//Fecha classe ClienteDAO

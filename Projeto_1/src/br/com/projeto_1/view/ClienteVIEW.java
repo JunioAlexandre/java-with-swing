@@ -20,6 +20,8 @@ public class ClienteVIEW extends javax.swing.JInternalFrame {
     ClienteCTR clienteCTR = new ClienteCTR(); // Cria um objeto clienteCTR
     
     int gravar_alterar; // Variavel usada para saber se esta alterando ou incluindo
+    ResultSet rs; //Variavel usada para preenchimento da tabela e dos campos
+    DefaultTableModel modelo_jtl_consultar_cliente; //Variavel para guardar o modelo da tabela
     
     public ClienteVIEW() {
         initComponents();
@@ -28,6 +30,7 @@ public class ClienteVIEW extends javax.swing.JInternalFrame {
         liberaCampos(false);
         //Chama o metodo liberaBotoes
         liberaBotoes(true, false, false, false, true);
+        modelo_jtl_consultar_cliente = (DefaultTableModel) jtl_consultar_cliente.getModel();
     }
 
     /**
@@ -137,12 +140,27 @@ public class ClienteVIEW extends javax.swing.JInternalFrame {
 
         btnCancelar.setFont(new java.awt.Font("Liberation Sans", 0, 18)); // NOI18N
         btnCancelar.setText("Cancelar");
+        btnCancelar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelarActionPerformed(evt);
+            }
+        });
 
         btnExcluir.setFont(new java.awt.Font("Liberation Sans", 0, 18)); // NOI18N
         btnExcluir.setText("Excluir");
+        btnExcluir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExcluirActionPerformed(evt);
+            }
+        });
 
         btnSair.setFont(new java.awt.Font("Liberation Sans", 0, 18)); // NOI18N
         btnSair.setText("Sair");
+        btnSair.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSairActionPerformed(evt);
+            }
+        });
 
         jLabel11.setFont(new java.awt.Font("Liberation Sans", 1, 24)); // NOI18N
         jLabel11.setText("Consulta");
@@ -176,6 +194,11 @@ public class ClienteVIEW extends javax.swing.JInternalFrame {
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit [columnIndex];
+            }
+        });
+        jtl_consultar_cliente.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jtl_consultar_clienteMouseClicked(evt);
             }
         });
         jScrollPane1.setViewportView(jtl_consultar_cliente);
@@ -325,7 +348,16 @@ public class ClienteVIEW extends javax.swing.JInternalFrame {
     private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvarActionPerformed
         if(gravar_alterar == 1){
             gravar();
-            gravar_alterar=0;
+            gravar_alterar= 0;
+        }
+        else{
+            if(gravar_alterar == 2){
+                alterar();
+                gravar_alterar = 0;
+            }
+            else{
+                JOptionPane.showMessageDialog(null, "Erro no Sistema!!!");
+            }
         }
         
         limpaCampos();
@@ -348,12 +380,39 @@ public class ClienteVIEW extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_pesquisa_nome_cliActionPerformed
 
     private void btnPesquisarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPesquisarActionPerformed
-        // TODO add your handling code here:
+        preencheTabela(pesquisa_nome_cli.getText());
     }//GEN-LAST:event_btnPesquisarActionPerformed
+
+    private void jtl_consultar_clienteMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jtl_consultar_clienteMouseClicked
+        preencheCampos(Integer.parseInt(String.valueOf(
+            jtl_consultar_cliente.getValueAt(
+            jtl_consultar_cliente.getSelectedRow(), 0))));
+        liberaBotoes(false, true, true, true, true);
+    }//GEN-LAST:event_jtl_consultar_clienteMouseClicked
+
+    private void btnExcluirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExcluirActionPerformed
+        excluir();
+        limpaCampos();
+        liberaCampos(false);
+        liberaBotoes(true, false, false, false, false);
+        modelo_jtl_consultar_cliente.setNumRows(0);
+    }//GEN-LAST:event_btnExcluirActionPerformed
+
+    private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
+         limpaCampos();
+         liberaCampos(false);
+         modelo_jtl_consultar_cliente.setNumRows(0);
+         liberaBotoes(true, false, false, false, true);
+         gravar_alterar = 0;
+    }//GEN-LAST:event_btnCancelarActionPerformed
+
+    private void btnSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSairActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_btnSairActionPerformed
 
 public void setPosicao(){
     Dimension d = this.getDesktopPane().getSize();
-    this.setLocation((d.width = this.getSize().width) / 2, (d.height = this.getSize().height) / 2);
+    this.setLocation((d.width - this.getSize().width) / 2, (d.height - this.getSize().height) / 2);
 }
  
 private void liberaCampos(boolean a){
@@ -405,6 +464,89 @@ private void gravar(){
     catch (Exception e){
         System.out.println("Erro ao gravar" + e.getMessage());
     }
+}
+
+private void preencheTabela(String nome_cli){
+    try{
+        //Limpa todas as linhas
+        modelo_jtl_consultar_cliente.setNumRows(0);
+        //Enquanto tiver linhas - faça
+        clienteDTO.setNome_cli(nome_cli);
+        rs = clienteCTR.consultarCliente(clienteDTO, 1); // 1 = ´ a pesquisa por nome na classe
+        
+        while(rs.next()){
+            modelo_jtl_consultar_cliente.addRow(new Object[]{
+                rs.getString("id_cli"),
+                rs.getString("nome_cli"),
+            });
+        }   
+    }
+    catch(Exception e){
+        System.out.println("Erro SQL: "+e);
+    }
+    finally{
+        clienteCTR.CloseDB();
+    }
+}//Fecha método preencheTabela(String nome)
+
+private void preencheCampos(int id_cli){
+    try{
+        clienteDTO.setId_cli(id_cli);
+        rs = clienteCTR.consultarCliente(clienteDTO, 2);
+        
+        if(rs.next()){
+            limpaCampos();
+            
+            nome_cli.setText(rs.getString("nome_cli"));
+            logradouro_cli.setText(rs.getString("logradouro_cli"));
+            numero_cli.setText(rs.getString("numero_cli"));
+            bairro_cli.setText(rs.getString("bairro_cli"));
+            cidade_cli.setText(rs.getString("cidade_cli"));
+            estado_cli.setSelectedItem(rs.getString("estado_cli"));
+            cep_cli.setText(rs.getString("cep_cli"));
+            cpf_cli.setText(rs.getString("cpf_cli"));
+            rg_cli.setText(rs.getString("rg_cli"));
+            
+            gravar_alterar = 2;
+            liberaCampos(true);
+        }//Fecha if(rs.next)
+    }
+    
+    catch(Exception e){
+        System.out.println("Erro SQL: "+e);
+    }
+    finally{
+        clienteCTR.CloseDB();
+    }
+}//Fecha metodo preencheCampos(int id_cliente)
+
+private void alterar(){
+    try{
+        clienteDTO.setNome_cli(nome_cli.getText());
+        clienteDTO.setLogradouro_cli(logradouro_cli.getText());
+        clienteDTO.setNumero_cli(Integer.parseInt(numero_cli.getText()));
+        clienteDTO.setBairro_cli(bairro_cli.getText());
+        clienteDTO.setCidade_cli(cidade_cli.getText());
+        clienteDTO.setEstado_cli(estado_cli.getSelectedItem().toString());
+        clienteDTO.setCep_cli(cep_cli.getText());
+        clienteDTO.setCpf_cli(cpf_cli.getText());
+        clienteDTO.setRg_cli(rg_cli.getText());
+        
+        JOptionPane.showMessageDialog(null,
+                clienteCTR.alterarCliente(clienteDTO));
+    }
+    catch (Exception e){
+        System.out.println("Erro ao alterar" + e.getMessage());
+    }
+}
+
+private void excluir(){
+    if(JOptionPane.showConfirmDialog(null, "Deseja realmente excluir o Cliente?","Aviso,",
+            JOptionPane.YES_NO_OPTION) == JOptionPane.YES_NO_OPTION){
+                     JOptionPane.showMessageDialog(null,
+                    clienteCTR.excluirCliente(clienteDTO));
+    }
+    
 }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
